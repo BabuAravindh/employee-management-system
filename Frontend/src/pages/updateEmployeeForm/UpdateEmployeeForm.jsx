@@ -1,9 +1,33 @@
-import React, { useState } from 'react'
+import axios from 'axios'
+import  { useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 export default function UpdateEmployeeForm() {
   const navigate = useNavigate()
   const { id } = useParams()
+ useEffect(() => {
+  const fetchEmployee = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/employee/${id}`);
+      const emp = response.data.formattedResults[0];
+      console.log(emp)
+      setFormData({
+        name: emp.name || '',
+        employeeId: emp.employeeId || '',
+        department: emp.department || '',
+        designation: emp.designation || '',
+        project: emp.project || '',
+        type: emp.type || '',
+        status: emp.status || '',
+        image: null
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  fetchEmployee();
+}, []);
 
   const [formData, setFormData] = useState({
     name: 'Mark otto',
@@ -11,8 +35,8 @@ export default function UpdateEmployeeForm() {
     department: "engineering",
     designation: "frontend developer",
     project: "project",
-    type: "full-time",
-    status: "active",
+    type: "office",
+    status: "permanent",
     image: null
   })
 
@@ -24,8 +48,26 @@ export default function UpdateEmployeeForm() {
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault()
+    const updatedForm = new FormData();
+  updatedForm.append("name", formData.name);
+  updatedForm.append("employeeId", formData.employeeId);
+  updatedForm.append("department", formData.department);
+  updatedForm.append("designation", formData.designation);
+  updatedForm.append("project", formData.project);
+  updatedForm.append("type", formData.type);
+  updatedForm.append("status", formData.status);
+  if (formData.image) {
+    updatedForm.append("image", formData.image);
+  }
+  console.log(updatedForm)
+    const response = await axios.patch(`http://localhost:5000/api/employee/${id}`,updatedForm,{
+      headers:{
+        'content-type':'multipart/form-data',
+      }
+    })
+    console.log(response.data.message)
     console.log('Updated Employee :', formData)
     navigate('/')
   }
@@ -51,7 +93,7 @@ export default function UpdateEmployeeForm() {
             <label htmlFor="imageUpload">
               <i className="bi bi-camera fs-3 text-muted"></i>
             </label>
-            <input type="file" id='imageupload' name='image' onChange={handleChange} hidden />
+            <input type="file" id='imageUpload' name='image' onChange={handleChange} hidden />
           </div>
         </div>
 
@@ -104,8 +146,8 @@ export default function UpdateEmployeeForm() {
                 <label htmlFor="type" className="fs-7 fw-bold mb-2">Type*</label>
                 <select id="type" name='type' className="form-select h-75" value={formData.type} onChange={handleChange}>
                   <option value="">Select Type</option>
-                  <option value="full-time">Full-time</option>
-                  <option value="part-time">Part-time</option>
+                  <option value="office">Office</option>
+                  <option value="home">Home</option>
                 </select>
               </div>
 
@@ -114,8 +156,8 @@ export default function UpdateEmployeeForm() {
                 <label htmlFor="status" className="fs-7 fw-bold mb-2">Status*</label>
                 <select id="status" className="form-select h-75" value={formData.status} name='status' onChange={handleChange}>
                   <option value="">Select Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
+                  <option value="permanent">Permanenet</option>
+                  <option value="temporary">Temporary</option>
                 </select>
               </div>
 

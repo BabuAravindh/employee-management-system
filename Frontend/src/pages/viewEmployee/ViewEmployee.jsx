@@ -1,17 +1,25 @@
 import { useEffect, useState } from "react";
 import { useNavigate,useParams } from "react-router-dom";
- const employee = {
-    name: 'Mark Otto',
-    employeeId: 'EMP001',
-    department: 'Engineering',
-    designation: 'Frontend Developer',
-    project: 'Project X',
-    type: 'Full-Time',
-    status: 'permanent',
-    imageURL: 'https://images.pexels.com/photos/17264401/pexels-photo-17264401/free-photo-of-close-up-photo-of-a-evarcha-spider-crawling-on-a-twig.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
-  };
+import axios from 'axios'
 export default function viewEmployee(){
+  const [employee,setEmployee] = useState({})
   const navigate = useNavigate()
+  const {id} = useParams()
+  console.log(id)
+   useEffect(() =>{
+
+    const fetchEmployee = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/employee/${id}`)
+        console.log(response.data)
+        setEmployee(response.data.formattedResults[0])
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    fetchEmployee()
+   },[]) 
+
  return(
   <>
   <div style={{ padding:'2rem', borderRadius:'10px'}}>
@@ -24,22 +32,22 @@ export default function viewEmployee(){
         <span className="tab-text active">Personal Information</span>
       </div>
       <div className="mb-3">
-        <img src="https://images.pexels.com/photos/17264401/pexels-photo-17264401/free-photo-of-close-up-photo-of-a-evarcha-spider-crawling-on-a-twig.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="" className="rounded"  width="100" height="100"/>
+        <img src={employee.imageURL} alt="" className="rounded"  width="100" height="100"/>
       </div>
       <div className="row">
         <div className="col-auto">
           <div className="row g-5">
             {
               [
-                {label:'Name',value:'babu'},
-                {label:'Employee Id',value:'12345'},
-                {label:'Department',value:'Engineering'},
-                {label:'Designation',value:'Developer'},
-                {label:'Project',value:'project'},
-                {label:'Type',value:'full-time'},
-                {label:'Status',value:'permanent'},
+                {label:'Name',value:employee.name},
+                {label:'Employee Id',value:employee.employeeId},
+                {label:'Department',value:employee.department},
+                {label:'Designation',value:employee.designation},
+                {label:'Project',value:employee.project},
+                {label:'Type',value:employee.type},
+                {label:'Status',value:employee.status},
               ].map((field,index) => (
-                <div className="col-md-6 border-bottom p-2">
+                <div key={index} className="col-md-6 border-bottom p-2">
                   <label  className="fs-7 fw-bold mb-1">
                     {field.label}
                   </label>
@@ -53,7 +61,6 @@ export default function viewEmployee(){
         </div>
       </div>
   </div>
-
   </>
  )
 }
